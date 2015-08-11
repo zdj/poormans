@@ -118,10 +118,11 @@ function syncFilesForDir(dir, cb) {
       var filesToBeDeleted = _.difference(syncDirFiles, syncedFiles);
       deleteFiles(filesToBeDeleted);
 
-      var filesToBeAdded = _.difference(syncedFiles, syncDirFiles);
-      addFiles(dir, filesToBeAdded)
-
       config[dir].syncedFiles = _.intersection(syncedFiles, serverFiles);
+
+      var filesToBeAdded = _.difference(config[dir].syncedFiles, syncDirFiles);
+      console.log(filesToBeAdded);
+      addFiles(dir, filesToBeAdded)
 
       cb()
     })
