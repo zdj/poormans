@@ -39,11 +39,6 @@ var config = {
 
 var fileExclusionList = ['$RECYCLE.BIN', '.DS_Store', '.localized']
 
-function exitWithError(error) {
-  console.error("Error was '" + JSON.stringify(error) + "'");
-  process.exit(1)
-}
-
 function refreshServerFilesForDir(dir, cb) {
 
   var mediaDir = config[dir];
@@ -51,7 +46,7 @@ function refreshServerFilesForDir(dir, cb) {
   fs.readdir(mediaDir.path, function(error, files) {
 
     if (error) {
-      exitWithError(error)
+      throw error
     } else {
 
       mediaDir.serverFiles = files;
@@ -67,7 +62,7 @@ function refreshServerFiles(cb) {
   }, function(err) {
 
     if (err) {
-      exitWithError(err)
+      throw err
     } else {
       cb()
     }
@@ -85,7 +80,7 @@ function syncFilesForDir(dir, cb) {
       fs.unlink(syncDir + '/' + file, function(err) {
 
         if(err) {
-          exitWithError(err)
+          throw err
         }
       })
     })
@@ -115,7 +110,7 @@ function syncFilesForDir(dir, cb) {
       var unmanagedFiles = _.difference(syncDirFiles, serverFiles);
       deleteFiles(unmanagedFiles);
 
-      var filesToBeDeleted = _.difference(syncDirFiles, syncedFiles);
+      var filesToBeDeleted = _.difference(_.difference(syncDirFiles, syncedFiles), unmanagedFiles);
       deleteFiles(filesToBeDeleted);
 
       config[dir].syncedFiles = _.intersection(syncedFiles, serverFiles);
@@ -136,7 +131,7 @@ function writeConfig(cb) {
 
       if (error) {
         console.error("\nCould not create the default configuration file '" + userConfigFile + "'");
-        exitWithError(error)
+        throw error
       }
 
       if(cb) {
@@ -157,7 +152,7 @@ function syncFiles(cb) {
       }, function(err) {
 
         if (err) {
-          exitWithError(err)
+          throw err
         } else {
           writeConfig(cb)
         }
@@ -172,7 +167,7 @@ function syncFiles(cb) {
 function watchForConfigChanges() {
 
   fs.watchFile(userConfigFile, {}, function (curr, prev) {
-    console.log('\nChanges detected at ' + new Date());
+    console.log("\nChanges detected at '" + new Date() + "'");
     syncFiles(watchForConfigChanges)
   });
 }
