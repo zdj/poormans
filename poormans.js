@@ -5,12 +5,13 @@ var _ = require('underscore');
 var async = require('async');
 var watchr = require('watchr');
 
-var syncDirectory = '/Users/zjones/Dropbox/Apps/Poormans';
+var homeDir = process.env.HOME;
+var syncDirectory = homeDir + '/Dropbox/Apps/Poormans';
 var userConfigFile = syncDirectory + '/config.json';
-var defaultDocumentsDirectory = '/Users/zjones/Documents';
-var defaultMoviesDirectory = '/Users/zjones/Movies';
-var defaultMusicDirectory = '/Users/zjones/Music';
-var defaultPicturesDirectory = '/Users/zjones/Pictures';
+var defaultDocumentsDirectory = homeDir +  + '/Documents';
+var defaultMoviesDirectory = homeDir + '/Movies';
+var defaultMusicDirectory = homeDir + '/Music';
+var defaultPicturesDirectory = homeDir + '/Pictures';
 
 var config = {
 
@@ -41,18 +42,6 @@ var fileExclusionList = ['$RECYCLE.BIN', '.DS_Store', '.localized']
 function exitWithError(error) {
   console.error("Error was '" + JSON.stringify(error) + "'");
   process.exit(1)
-}
-
-function watchForConfigChanges() {
-
-  fs.watchFile(userConfigFile, {}, function (curr, prev) {
-
-    console.log(curr);
-    console.log(prev);
-
-    console.log('\nChanges detected!');
-    syncFiles(watchForConfigChanges)
-  });
 }
 
 function refreshServerFilesForDir(dir, cb) {
@@ -89,15 +78,30 @@ function syncFilesForDir(dir, cb) {
 
   var syncDir = syncDirectory + '/' + config[dir].name;
 
-  function deleteUnmanagedFiles(unmanagedFiles) {
+  function deleteFiles(files) {
 
-    _.each(unmanagedFiles, function(unmanagedFile) {
-      fs.unlink(syncDir + '/' + unmanagedFile, function(err) {
+    _.each(files, function(file) {
+
+      fs.unlink(syncDir + '/' + file, function(err) {
 
         if(err) {
           exitWithError(err)
         }
       })
+    })
+  }
+
+  function addFiles(dir, files) {
+
+    _.each(files, function(file) {
+
+      var fromPath = config[dir].path + '/' + file;
+      var toPath = syncDir + '/' + file;
+
+      var reader = fs.createReadStream(fromPath);
+      var writer = fs.createWriteStream(toPath);
+
+      reader.pipe(writer)
     })
   }
 
@@ -109,7 +113,13 @@ function syncFilesForDir(dir, cb) {
       var syncedFiles = config[dir].syncedFiles;
 
       var unmanagedFiles = _.difference(syncDirFiles, serverFiles);
-      deleteUnmanagedFiles(unmanagedFiles);
+      deleteFiles(unmanagedFiles);
+
+      var filesToBeDeleted = _.difference(syncDirFiles, syncedFiles);
+      deleteFiles(filesToBeDeleted);
+
+      var filesToBeAdded = _.difference(syncedFiles, syncDirFiles);
+      addFiles(dir, filesToBeAdded)
 
       config[dir].syncedFiles = _.intersection(syncedFiles, serverFiles);
 
@@ -156,8 +166,15 @@ function syncFiles(cb) {
   }
 
   fs.unwatchFile(userConfigFile)
-
   syncFiles()
+}
+
+function watchForConfigChanges() {
+
+  fs.watchFile(userConfigFile, {}, function (curr, prev) {
+    console.log('\nChanges detected at ' + new Date());
+    syncFiles(watchForConfigChanges)
+  });
 }
 
 function readConfig(cb) {
