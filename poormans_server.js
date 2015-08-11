@@ -121,7 +121,6 @@ function syncFilesForDir(dir, cb) {
       config[dir].syncedFiles = _.intersection(syncedFiles, serverFiles);
 
       var filesToBeAdded = _.difference(config[dir].syncedFiles, syncDirFiles);
-      console.log(filesToBeAdded);
       addFiles(dir, filesToBeAdded)
 
       cb()
