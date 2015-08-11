@@ -7,7 +7,6 @@ var watchr = require('watchr');
 
 var syncDirectory = '/Users/zjones/Dropbox/Apps/Poormans';
 var userConfigFile = syncDirectory + '/config.json';
-var syncFlagFile = syncDirectory + '/.syncInProgress';
 var defaultDocumentsDirectory = '/Users/zjones/Documents';
 var defaultMoviesDirectory = '/Users/zjones/Movies';
 var defaultMusicDirectory = '/Users/zjones/Music';
@@ -42,6 +41,18 @@ var fileExclusionList = ['$RECYCLE.BIN', '.DS_Store', '.localized']
 function exitWithError(error) {
   console.error("Error was '" + JSON.stringify(error) + "'");
   process.exit(1)
+}
+
+function watchForConfigChanges() {
+
+  fs.watchFile(userConfigFile, {}, function (curr, prev) {
+
+    console.log(curr);
+    console.log(prev);
+
+    console.log('\nChanges detected!');
+    syncFiles(watchForConfigChanges)
+  });
 }
 
 function refreshServerFilesForDir(dir, cb) {
@@ -118,7 +129,9 @@ function writeConfig(cb) {
         exitWithError(error)
       }
 
-      cb()
+      if(cb) {
+        cb()
+      }
     })
   })
 }
@@ -136,24 +149,15 @@ function syncFiles(cb) {
         if (err) {
           exitWithError(err)
         } else {
-
-          writeConfig(function() {
-
-            if (cb) {
-              cb()
-            }
-          })
+          writeConfig(cb)
         }
       })
     })
   }
 
-  fs.exists(syncFlagFile, function(exists) {
+  fs.unwatchFile(userConfigFile)
 
-    if (!exists) {
-      syncFiles()
-    }
-  })
+  syncFiles()
 }
 
 function readConfig(cb) {
@@ -182,37 +186,6 @@ function readConfig(cb) {
 
 function startDaemon() {
 
-  function watchForChanges() {
-
-    watchr.watch({
-      paths: [userConfigFile],
-      listeners: {
-        error: function(err) {
-          console.error('\nAn error occurred when watching changes to ' + userConfigFile + ': ' + err + '\n')
-        },
-        watching: function(err, watcherInstance, isWatching) {
-
-          if (err) {
-            console.error('\nAn error occurred when watching changes to ' + userConfigFile + ': ' + err + '\n')
-          } else {
-            console.log('\nWatching for changes to ' + userConfigFile + ' ...');
-          }
-        },
-        change: function(changeType, filePath, fileCurrentStat, filePreviousStat) {
-
-          console.log('\nChanges detected!')
-          syncFiles()
-        }
-      },
-      next: function(err, watchers) {
-
-        if (err) {
-          return console.error('\nAn error occurred when watching changes to ' + userConfigFile + ': ' + err + '\n')
-        }
-      }
-    })
-  }
-
   console.log('\nDirectory Settings:\n');
 
   _.each(_.keys(config), function(dir) {
@@ -224,7 +197,7 @@ function startDaemon() {
   refreshServerFiles(function() {
 
     console.log('\nSyncing media to/from Dropbox ...');
-    syncFiles(watchForChanges)
+    syncFiles(watchForConfigChanges)
   })
 }
 
