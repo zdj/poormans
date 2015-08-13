@@ -1,14 +1,14 @@
 {
-  "name": "poormans",
+  "name": "poormans_server",
   "version": "0.0.1",
   "description": "Coming soon ...",
-  "main": "poormans.js",
+  "main": "poormans_server.js",
   "scripts": {
     "test": "mocha -R list test/*.test"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:zdj/poormans.git"
+    "url": "git@github.com:zdj/poormans_server.git"
   },
   "keywords": [
     "media",
@@ -19,9 +19,9 @@
   "author": "https://github.com/zdj",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zdj/poormans/issues"
+    "url": "https://github.com/zdj/poormans_server/issues"
   },
-  "homepage": "https://github.com/zdj/poormans",
+  "homepage": "https://github.com/zdj/poormans_server",
   "devDependencies": {
     "async": "^1.2.0",
     "mocha": "^2.2.5",

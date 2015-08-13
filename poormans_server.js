@@ -49,7 +49,7 @@ function refreshServerFilesForDir(dir, cb) {
       throw error
     } else {
 
-      mediaDir.serverFiles = files;
+      mediaDir.serverFiles = _.difference(files, fileExclusionList);
       cb()
     }
   });
@@ -80,7 +80,7 @@ function syncFilesForDir(dir, cb) {
       fs.unlink(syncDir + '/' + file, function(err) {
 
         if(err) {
-          throw err
+          console.error(err.stack)
         }
       })
     })
@@ -167,6 +167,7 @@ function syncFiles(cb) {
 function watchForConfigChanges() {
 
   fs.watchFile(userConfigFile, {}, function (curr, prev) {
+
     console.log("\nChanges detected at '" + new Date() + "'");
     syncFiles(watchForConfigChanges)
   });
