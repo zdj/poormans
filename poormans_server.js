@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var fs = require('fs');
+var fsExtra = require('fs-extra');
 var _ = require('underscore');
 var async = require('async');
 var watchr = require('watchr');
@@ -37,7 +38,7 @@ var config = {
   }
 };
 
-var fileExclusionList = ['$RECYCLE.BIN', '.DS_Store', '.localized']
+var fileExclusionList = ['$RECYCLE.BIN', '.DS_Store', '.localized', 'BACKUPS']
 
 function refreshServerFilesForDir(dir, cb) {
 
@@ -47,11 +48,10 @@ function refreshServerFilesForDir(dir, cb) {
 
     if (error) {
       throw error
-    } else {
-
-      mediaDir.serverFiles = _.difference(files, fileExclusionList);
-      cb()
     }
+
+    mediaDir.serverFiles = _.difference(files, fileExclusionList);
+    cb()
   });
 }
 
@@ -63,9 +63,9 @@ function refreshServerFiles(cb) {
 
     if (err) {
       throw err
-    } else {
-      cb()
     }
+
+    cb()
   });
 }
 
@@ -73,30 +73,54 @@ function syncFilesForDir(dir, cb) {
 
   var syncDir = syncDirectory + '/' + config[dir].name;
 
-  function deleteFiles(files) {
+  function deleteFiles(files, cb) {
 
-    _.each(files, function(file) {
+    async.each(files, function(file, cb) {
 
-      fs.unlink(syncDir + '/' + file, function(err) {
+      fsExtra.remove(syncDir + '/' + file, function (err) {
 
-        if(err) {
-          console.error(err.stack)
+        if (err) {
+          throw err
         }
+
+        cb()
       })
+    }, function(err) {
+
+      if (err) {
+        throw err
+      }
+
+      if(cb) {
+        cb()
+      }
     })
   }
 
-  function addFiles(dir, files) {
+  function addFiles(dir, files, cb) {
 
-    _.each(files, function(file) {
+    async.each(files, function(file, cb) {
 
       var fromPath = config[dir].path + '/' + file;
       var toPath = syncDir + '/' + file;
 
-      var reader = fs.createReadStream(fromPath);
-      var writer = fs.createWriteStream(toPath);
+      fsExtra.copy(fromPath, toPath, function (err) {
 
-      reader.pipe(writer)
+        if (err) {
+          throw err
+        }
+
+        cb()
+      })
+    }, function(err) {
+
+      if (err) {
+        throw err
+      }
+
+      if(cb) {
+        cb()
+      }
     })
   }
 
@@ -106,19 +130,15 @@ function syncFilesForDir(dir, cb) {
 
       var serverFiles = config[dir].serverFiles;
       var syncedFiles = config[dir].syncedFiles;
+      var unmanagedFiles = _.difference(syncDirFiles, syncedFiles);
 
-      var unmanagedFiles = _.difference(syncDirFiles, serverFiles);
-      deleteFiles(unmanagedFiles);
+      deleteFiles(unmanagedFiles, function() {
 
-      var filesToBeDeleted = _.difference(_.difference(syncDirFiles, syncedFiles), unmanagedFiles);
-      deleteFiles(filesToBeDeleted);
+        config[dir].syncedFiles = _.intersection(syncedFiles, serverFiles);
+        var filesToBeAdded = _.difference(config[dir].syncedFiles, syncDirFiles);
 
-      config[dir].syncedFiles = _.intersection(syncedFiles, serverFiles);
-
-      var filesToBeAdded = _.difference(config[dir].syncedFiles, syncDirFiles);
-      addFiles(dir, filesToBeAdded)
-
-      cb()
+        addFiles(dir, filesToBeAdded, cb)
+      })
     })
   })
 }
@@ -153,9 +173,9 @@ function syncFiles(cb) {
 
         if (err) {
           throw err
-        } else {
-          writeConfig(cb)
         }
+
+        writeConfig(cb)
       })
     })
   }
@@ -183,14 +203,23 @@ function readConfig(cb) {
 
     fs.readFile(userConfigFile, 'utf8', function(error, data) {
 
-      if (error && error.code == 'ENOENT') {
+      if (error) {
 
-        console.log("\nThe configuration file '" + userConfigFile + "' does not exist");
-        writeConfig(cb)
+        if(error.code == 'ENOENT') {
+
+          console.log("\nThe configuration file '" + userConfigFile + "' does not exist");
+          writeConfig(cb)
+
+        } else {
+          throw err
+        }
 
       } else {
 
-        config = JSON.parse(data);
+        if(data.length != 0) {
+          config = JSON.parse(data)
+        }
+
         cb()
       }
     });

@@ -24,6 +24,7 @@
   "homepage": "https://github.com/zdj/poormans_server",
   "devDependencies": {
     "async": "^1.2.0",
+    "fs-extra": "^0.23.1",
     "mocha": "^2.2.5",
     "underscore": "^1.8.3",
     "watchr": "^2.4.13"
