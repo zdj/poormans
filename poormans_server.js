@@ -5,60 +5,29 @@ var fsExtra = require('fs-extra');
 var _ = require('underscore');
 var async = require('async');
 var watchr = require('watchr');
+var mkdirp = require('mkdirp');
 
-var homeDir = process.env.HOME;
-var syncDirectory = homeDir + '/Dropbox/Apps/Poormans';
-var userConfigFile = syncDirectory + '/config.json';
-var defaultDocumentsDirectory = homeDir + '/Documents';
-var defaultMoviesDirectory = homeDir + '/Movies';
-var defaultMusicDirectory = homeDir + '/Music';
-var defaultPicturesDirectory = homeDir + '/Pictures';
+var config = {};
 
-var config = {
+function refreshFilesForManagedDirectory(managedDirectory, cb) {
 
-  documentsDir: {
-    path: defaultDocumentsDirectory,
-    name: 'Documents',
-    syncedFiles: []
-  },
-  moviesDir: {
-    path: defaultMoviesDirectory,
-    name: 'Movies',
-    syncedFiles: []
-  },
-  musicDir: {
-    path: defaultMusicDirectory,
-    name: 'Music',
-    syncedFiles: []
-  },
-  picturesDir: {
-    path: defaultPicturesDirectory,
-    name: 'Pictures',
-    syncedFiles: []
-  }
-};
-
-var fileExclusionList = ['$RECYCLE.BIN', '.DS_Store', '.localized', 'BACKUPS']
-
-function refreshServerFilesForDir(dir, cb) {
-
-  var mediaDir = config[dir];
-
-  fs.readdir(mediaDir.path, function(error, files) {
+  fs.readdir(managedDirectory.path, function(error, files) {
 
     if (error) {
       throw error
     }
 
-    mediaDir.serverFiles = _.difference(files, fileExclusionList);
+    managedDirectory.files = _.difference(files, config.excludedFiles);
     cb()
   });
 }
 
-function refreshServerFiles(cb) {
+function refreshFilesForMangagedDirectories(cb) {
 
-  async.each(_.keys(config), function(dir, cb) {
-    refreshServerFilesForDir(dir, cb)
+  var managedDirectories = config.managedDirectories;
+
+  async.each(managedDirectories, function(managedDirectory, cb) {
+    refreshFilesForManagedDirectory(managedDirectory, cb)
   }, function(err) {
 
     if (err) {
@@ -69,9 +38,9 @@ function refreshServerFiles(cb) {
   });
 }
 
-function syncFilesForDir(dir, cb) {
+function syncManagedFilesForManagedDirectory(managedDirectory, cb) {
 
-  var syncDir = syncDirectory + '/' + config[dir].name;
+  var syncDir = config.poormansDropboxDirectory + '/' + managedDirectory.name;
 
   function deleteFiles(files, cb) {
 
@@ -97,11 +66,11 @@ function syncFilesForDir(dir, cb) {
     })
   }
 
-  function addFiles(dir, files, cb) {
+  function addFiles(managedDirectory, files, cb) {
 
     async.each(files, function(file, cb) {
 
-      var fromPath = config[dir].path + '/' + file;
+      var fromPath = managedDirectory.path + '/' + file;
       var toPath = syncDir + '/' + file;
 
       fsExtra.copy(fromPath, toPath, function (err) {
@@ -124,20 +93,19 @@ function syncFilesForDir(dir, cb) {
     })
   }
 
-  refreshServerFilesForDir(dir, function() {
+  refreshFilesForManagedDirectory(managedDirectory, function() {
 
     fs.readdir(syncDir, function(error, syncDirFiles) {
 
-      var serverFiles = config[dir].serverFiles;
-      var syncedFiles = config[dir].syncedFiles;
-      var unmanagedFiles = _.difference(syncDirFiles, syncedFiles);
+      var files = managedDirectory.files;
+      var managedFiles = managedDirectory.managedFiles;
+      var unmanagedFiles = _.difference(syncDirFiles, managedFiles);
 
       deleteFiles(unmanagedFiles, function() {
 
-        config[dir].syncedFiles = _.intersection(syncedFiles, serverFiles);
-        var filesToBeAdded = _.difference(config[dir].syncedFiles, syncDirFiles);
-
-        addFiles(dir, filesToBeAdded, cb)
+        managedDirectory.managedFiles = _.intersection(managedFiles, files);
+        var filesToBeAdded = _.difference(managedFiles, syncDirFiles);
+        addFiles(managedDirectory, filesToBeAdded, cb)
       })
     })
   })
@@ -145,12 +113,12 @@ function syncFilesForDir(dir, cb) {
 
 function writeConfig(cb) {
 
-  refreshServerFiles(function() {
+  refreshFilesForMangagedDirectories(function() {
 
-    fs.writeFile(userConfigFile, JSON.stringify(config), function(error) {
+    fs.writeFile(config.configFilePath, JSON.stringify(config), function(error) {
 
       if (error) {
-        console.error("\nCould not create the default configuration file '" + userConfigFile + "'");
+        console.error("\nCould not create the default configuration file '" + config.configFilePath + "'");
         throw error
       }
 
@@ -161,53 +129,65 @@ function writeConfig(cb) {
   })
 }
 
-function syncFiles(cb) {
+function syncManagedFiles(cb) {
 
-  function syncFiles() {
+  fs.unwatchFile(config.configFilePath);
 
-    readConfig(function() {
+  async.each(config.managedDirectories, function(managedDirectory, cb) {
+    syncManagedFilesForManagedDirectory(managedDirectory, cb)
+  }, function(err) {
 
-      async.each(_.keys(config), function(dir, cb) {
-        syncFilesForDir(dir, cb)
-      }, function(err) {
+    if (err) {
+      throw err
+    }
 
-        if (err) {
-          throw err
-        }
-
-        writeConfig(cb)
-      })
-    })
-  }
-
-  fs.unwatchFile(userConfigFile)
-  syncFiles()
+    writeConfig(cb)
+  })
 }
 
 function watchForConfigChanges() {
 
-  fs.watchFile(userConfigFile, {}, function (curr, prev) {
+  fs.watchFile(config.configFilePath, {}, function (curr, prev) {
 
     console.log("\nChanges detected at '" + new Date() + "'");
-    syncFiles(watchForConfigChanges)
+
+    readConfig(function() {
+      syncManagedFiles(watchForConfigChanges)
+    })
   });
 }
 
 function readConfig(cb) {
 
-  fs.mkdir(syncDirectory, '770', function(error) {
+  fs.readFile('./config.json', 'utf8', function(error, data) {
 
-    _.each(_.keys(config), function(dir) {
-      fs.mkdir(syncDirectory + '/' + config[dir].name, '770', function(error) {})
+    if(error) {
+      throw error
+    }
+
+    var defaultConfig = JSON.parse(data);
+    config.excludedFiles = defaultConfig.excludedFiles;
+    var poormansDropboxDirectory = config.poormansDropboxDirectory = defaultConfig.userDropboxDirectory + '/Apps/Poormans';
+    var managedDirectories = config.managedDirectories = defaultConfig.managedDirectories;
+    var configFile = config.configFilePath = poormansDropboxDirectory + '/config.json';
+
+    _.each(managedDirectories, function(managedDirectory) {
+
+      mkdirp(poormansDropboxDirectory + '/' + managedDirectory.name, '770', function(error) {
+
+        if(error) {
+          throw error
+        }
+      })
     });
 
-    fs.readFile(userConfigFile, 'utf8', function(error, data) {
+    fs.readFile(configFile, 'utf8', function(error, data) {
 
       if (error) {
 
         if(error.code == 'ENOENT') {
 
-          console.log("\nThe configuration file '" + userConfigFile + "' does not exist");
+          console.log("\nThe configuration file '" + configFile + "' does not exist. Using the default.");
           writeConfig(cb)
 
         } else {
@@ -222,27 +202,22 @@ function readConfig(cb) {
 
         cb()
       }
-    });
-  });
+    })
+  })
 }
 
 function startDaemon() {
 
   console.log('\nDirectory Settings:\n');
 
-  _.each(_.keys(config), function(dir) {
-
-    var mediaDir = config[dir];
-    console.log('\t' + mediaDir.name + ' -> ' + mediaDir.path);
+  _.each(config.managedDirectories, function(managedDirectory) {
+    console.log('\t' + managedDirectory.name + ' => ' + managedDirectory.path);
   });
 
-  refreshServerFiles(function() {
-
-    console.log('\nSyncing media to/from Dropbox ...');
-    syncFiles(watchForConfigChanges)
-  })
+  console.log('\nSyncing media to/from Dropbox ...');
+  syncManagedFiles(watchForConfigChanges)
 }
 
 readConfig(function() {
   startDaemon()
-});
+})
