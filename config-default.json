@@ -1,0 +1,24 @@
+{
+  "userDropboxDirectory": "/Users/dnarkiewicz/Dropbox",
+  "managedDirectories": [
+    {
+      "name": "Music",
+      "path": "/Users/dnarkiewicz/Music",
+      "files": [],
+      "managedFiles": []
+    },
+    {
+      "name": "Movies",
+      "path": "/Users/dnarkiewicz/Movies",
+      "files": [],
+      "managedFiles": []
+    },
+    {
+      "name": "Pictures",
+      "path": "/Users/dnarkiewicz/Pictures",
+      "files": [],
+      "managedFiles": []
+    }
+  ],
+  "excludedFiles": ["$RECYCLE.BIN", ".DS_Store", ".localized", "BACKUPS"]
+}
