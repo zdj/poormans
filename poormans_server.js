@@ -114,7 +114,7 @@ function writeConfig(cb) {
 
   refreshFilesForMangagedDirectories(function() {
 
-    fs.writeFile(config.configFilePath, JSON.stringify(config), function(error) {
+    fs.writeFile(config.configFilePath, JSON.stringify(config,null,2), function(error) {
 
       if (error) {
         console.error("\nCould not create the default configuration file '" + config.configFilePath + "'");
