@@ -2,7 +2,7 @@
 
 ## About
 
-A Node.js script that allows the syncing of files in one or more of the host machine's directories with Dropbox. With remote access to Dropbox, users and external applications can remotely manage a JSON configuration file, specifying the files and directories to copy to Dropbox from the host machine.
+A Node.js script that allows the copying of files in one or more of the host machine's directories to Dropbox. With remote access to Dropbox, users and external applications can manage a JSON configuration file, specifying the files and directories to copy to Dropbox from the host machine.
 
 ## Installation
 
@@ -44,10 +44,10 @@ cd poormans_server
 
 - *userDropboxDirectory*: The location of the Dropbox directory on the host machine.
 - *managedDirectories*: The set of directories to manage on the host machine.
-  - *name*: A name to identify this managed directory. Also becomes the folder name of the Dropbox folder used to sync content from this managed directory.
+  - *name*: A name to identify this managed directory. Also becomes the folder name of the Dropbox folder used to copy content from this managed directory.
   - *path*: The location of the managed directory. This property is derived by the script.
   - *files*: The list of files in the managed directory.
-  - *managedFiles*: Files that are synced to the Dropbox folder from the managed directory. See more about this property in the section below entitled ***Managing host machine files with Dropbox***
+  - *managedFiles*: Files that are copied to the Dropbox folder from the managed directory. See more about this property in the section below entitled ***Managing host machine files with Dropbox***
 - *excludedFiles*: A set of filenames to exclude from the array *managedDirectories.files*
 
 ## Running
@@ -69,7 +69,7 @@ The first time the script is run, it will attempt to create the required folders
 
 ## Managing host machine files with Dropbox
 
-You must have access to Dropbox via a remote machine or mobile application to sync files from the host machine.
+You must have access to Dropbox via a remote machine or mobile application to copy files from the host machine.
 
 Files can be managed by making changes to the config file created in the script's Dropbox folder, */Users/zjones/Dropbox/Apps/Poormans/config.json*.
 
