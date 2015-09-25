@@ -171,37 +171,44 @@ function readConfig(cb) {
     var managedDirectories = config.managedDirectories = defaultConfig.managedDirectories;
     var configFile = config.configFilePath = poormansDropboxDirectory + '/config.json';
 
-    _.each(managedDirectories, function(managedDirectory) {
+    async.each(config.managedDirectories, function(managedDirectory, cb) {
 
       mkdirp(poormansDropboxDirectory + '/' + managedDirectory.name, '770', function(error) {
 
         if(error) {
           throw error
         }
-      })
-    });
-
-    fs.readFile(configFile, 'utf8', function(error, data) {
-
-      if (error) {
-
-        if(error.code == 'ENOENT') {
-
-          console.log("\nThe configuration file '" + configFile + "' does not exist. Using the default.");
-          writeConfig(cb)
-
-        } else {
-          throw err
-        }
-
-      } else {
-
-        if(data.length != 0) {
-          config = JSON.parse(data)
-        }
 
         cb()
+      })
+    }, function(err) {
+
+      if(err) {
+        throw err
       }
+
+      fs.readFile(configFile, 'utf8', function(error, data) {
+
+        if (error) {
+
+          if(error.code == 'ENOENT') {
+
+            console.log("\nThe configuration file '" + configFile + "' does not exist. Using the default.");
+            writeConfig(cb)
+
+          } else {
+            throw err
+          }
+
+        } else {
+
+          if(data.length != 0) {
+            config = JSON.parse(data)
+          }
+
+          cb()
+        }
+      })
     })
   })
 }

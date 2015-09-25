@@ -9,6 +9,7 @@ A Node.js script that allows the copying of files in one or more of the host mac
 ```bash
 git clone git@github.com:zdj/poormans_server.git
 cd poormans_server
+npm install
 ```
 
 ## Configuration
