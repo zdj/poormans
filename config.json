@@ -1,0 +1,24 @@
+{
+  "userDropboxDirectory": "/Users/zjones/Dropbox",
+  "managedDirectories": [
+    {
+      "name": "Music",
+      "path": "/Users/zjones/Music",
+      "files": [],
+      "managedFiles": []
+    },
+    {
+      "name": "Movies",
+      "path": "/Users/zjones/Movies",
+      "files": [],
+      "managedFiles": []
+    },
+    {
+      "name": "Pictures",
+      "path": "/Users/zjones/Pictures",
+      "files": [],
+      "managedFiles": []
+    }
+  ],
+  "excludedFiles": ["$RECYCLE.BIN", ".DS_Store", ".localized", "BACKUPS"]
+}

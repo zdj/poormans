@@ -19,7 +19,7 @@ function refreshFilesForManagedDirectory(managedDirectory, cb) {
 
     managedDirectory.files = _.difference(files, config.excludedFiles);
     cb()
-  });
+  })
 }
 
 function refreshFilesForMangagedDirectories(cb) {
@@ -35,7 +35,7 @@ function refreshFilesForMangagedDirectories(cb) {
     }
 
     cb()
-  });
+  })
 }
 
 function syncManagedFilesForManagedDirectory(managedDirectory, cb) {
