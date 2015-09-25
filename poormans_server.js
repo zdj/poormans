@@ -104,7 +104,7 @@ function syncManagedFilesForManagedDirectory(managedDirectory, cb) {
       deleteFiles(unmanagedFiles, function() {
 
         managedDirectory.managedFiles = _.intersection(managedFiles, files);
-        var filesToBeAdded = _.difference(managedFiles, syncDirFiles);
+        var filesToBeAdded = _.difference(managedDirectory.managedFiles, syncDirFiles);
         addFiles(managedDirectory, filesToBeAdded, cb)
       })
     })
