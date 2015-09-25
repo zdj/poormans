@@ -1,1 +1,80 @@
-# poormans-server
+# Poormans Media Server
+
+## About
+
+A Node.js script that allows the syncing of files in one or more of the host machine's directories with Dropbox. With remote access to Dropbox, users and external applications can remotely manage a JSON configuration file, specifying the files and directories to copy to Dropbox from the host machine.
+
+## Installation
+
+```bash
+git clone git@github.com:zdj/poormans_server.git
+cd poormans_server
+```
+
+## Configuration
+
+***config.json***
+
+```json
+{
+  "userDropboxDirectory": "/Users/zjones/Dropbox",
+  "managedDirectories": [
+    {
+      "name": "Music",
+      "path": "/Users/zjones/Music",
+      "files": [],
+      "managedFiles": []
+    },
+    {
+      "name": "Movies",
+      "path": "/Users/zjones/Movies",
+      "files": [],
+      "managedFiles": []
+    },
+    {
+      "name": "Pictures",
+      "path": "/Users/zjones/Pictures",
+      "files": [],
+      "managedFiles": []
+    }
+  ],
+  "excludedFiles": ["$RECYCLE.BIN", ".DS_Store", ".localized", "BACKUPS"]
+}
+```
+
+- *userDropboxDirectory*: The location of the Dropbox directory on the host machine.
+- *managedDirectories*: The set of directories to manage on the host machine.
+  - *name*: A name to identify this managed directory. Also becomes the folder name of the Dropbox folder used to sync content from this managed directory.
+  - *path*: The location of the managed directory. This property is derived by the script.
+  - *files*: The list of files in the managed directory.
+  - *managedFiles*: Files that are synced to the Dropbox folder from the managed directory. See more about this property in the section below entitled ***Managing host machine files with Dropbox***
+- *excludedFiles*: A set of filenames to exclude from the array *managedDirectories.files*
+
+## Running
+
+After updating *config.json* for the host machine, run the script:
+
+```bash
+./poormans_server
+```
+
+The first time the script is run, it will attempt to create the required folders specified by *config.json*. For example, the default configuration file shown above would create the following directories and files:
+
+```
+/Users/zjones/Dropbox/Apps/Poormans/Music
+/Users/zjones/Dropbox/Apps/Poormans/Movies
+/Users/zjones/Dropbox/Apps/Poormans/Pictures
+/Users/zjones/Dropbox/Apps/Poormans/config.json
+```
+
+## Managing host machine files with Dropbox
+
+You must have access to Dropbox via a remote machine or mobile application to sync files from the host machine.
+
+Files can be managed by making changes to the config file created in the script's Dropbox folder, */Users/zjones/Dropbox/Apps/Poormans/config.json*.
+
+To add files from the host machine to Dropbox, add entries from *managedDirectories.files* to *managedDirectories.managedFiles*.
+
+Likewise, to remove files from Dropbox, remove entires from *managedDirectories.managedFiles*.
+
+The script will delete any files and clean up erroneous entries in *managedDirectories.managedFiles* that aren't in *managedDirectories.files*.

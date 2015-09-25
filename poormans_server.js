@@ -154,7 +154,7 @@ function watchForConfigChanges() {
     readConfig(function() {
       syncManagedFiles(watchForConfigChanges)
     })
-  });
+  })
 }
 
 function readConfig(cb) {
