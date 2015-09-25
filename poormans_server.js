@@ -4,7 +4,6 @@ var fs = require('fs');
 var fsExtra = require('fs-extra');
 var _ = require('underscore');
 var async = require('async');
-var watchr = require('watchr');
 var mkdirp = require('mkdirp');
 
 var config = {};

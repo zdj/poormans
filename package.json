@@ -27,8 +27,7 @@
     "fs-extra": "^0.23.1",
     "mkdirp": "^0.5.1",
     "mocha": "^2.2.5",
-    "underscore": "^1.8.3",
-    "watchr": "^2.4.13"
+    "underscore": "^1.8.3"
   },
   "dependencies": {
     "watchr": "^2.4.13"
