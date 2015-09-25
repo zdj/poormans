@@ -197,7 +197,7 @@ function readConfig(cb) {
             writeConfig(cb)
 
           } else {
-            throw err
+            throw error
           }
 
         } else {
