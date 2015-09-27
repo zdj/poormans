@@ -27,10 +27,10 @@ function refreshFilesForMangagedDirectories(cb) {
 
   async.each(managedDirectories, function(managedDirectory, cb) {
     refreshFilesForManagedDirectory(managedDirectory, cb)
-  }, function(err) {
+  }, function(error) {
 
-    if (err) {
-      throw err
+    if (error) {
+      throw error
     }
 
     cb()
@@ -45,18 +45,18 @@ function syncManagedFilesForManagedDirectory(managedDirectory, cb) {
 
     async.each(files, function(file, cb) {
 
-      fsExtra.remove(managedDirectoryMirrorPath + '/' + file, function (err) {
+      fsExtra.remove(managedDirectoryMirrorPath + '/' + file, function (error) {
 
-        if (err) {
-          throw err
+        if (error) {
+          throw error
         }
 
         cb()
       })
-    }, function(err) {
+    }, function(error) {
 
-      if (err) {
-        throw err
+      if (error) {
+        throw error
       }
 
       if(cb) {
@@ -72,18 +72,18 @@ function syncManagedFilesForManagedDirectory(managedDirectory, cb) {
       var fromPath = managedDirectory.path + '/' + file;
       var toPath = managedDirectoryMirrorPath + '/' + file;
 
-      fsExtra.copy(fromPath, toPath, function (err) {
+      fsExtra.copy(fromPath, toPath, function (error) {
 
-        if (err) {
-          throw err
+        if (error) {
+          throw error
         }
 
         cb()
       })
-    }, function(err) {
+    }, function(error) {
 
-      if (err) {
-        throw err
+      if (error) {
+        throw error
       }
 
       if(cb) {
@@ -134,10 +134,10 @@ function syncManagedFiles(cb) {
 
   async.each(config.managedDirectories, function(managedDirectory, cb) {
     syncManagedFilesForManagedDirectory(managedDirectory, cb)
-  }, function(err) {
+  }, function(error) {
 
-    if (err) {
-      throw err
+    if (error) {
+      throw error
     }
 
     writeConfig(cb)
@@ -186,10 +186,10 @@ function readConfig(cb) {
 
         cb()
       })
-    }, function(err) {
+    }, function(error) {
 
-      if(err) {
-        throw err
+      if(error) {
+        throw error
       }
 
       fs.readFile(configFile, 'utf8', function(error, data) {
