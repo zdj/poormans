@@ -23,9 +23,7 @@ function refreshFilesForManagedDirectory(managedDirectory, cb) {
 
 function refreshFilesForMangagedDirectories(cb) {
 
-  var managedDirectories = config.managedDirectories;
-
-  async.each(managedDirectories, function(managedDirectory, cb) {
+  async.each(config.managedDirectories, function(managedDirectory, cb) {
     refreshFilesForManagedDirectory(managedDirectory, cb)
   }, function(error) {
 
