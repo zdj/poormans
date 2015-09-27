@@ -1,21 +1,21 @@
 {
-  "userDropboxDirectory": "/Users/zjones/Dropbox",
+  "userDropboxDirectory": "/Users/mentuhotep/Dropbox",
   "managedDirectories": [
     {
       "name": "Music",
-      "path": "/Users/zjones/Music",
+      "path": "/Users/mentuhotep/Music",
       "files": [],
       "managedFiles": []
     },
     {
       "name": "Movies",
-      "path": "/Users/zjones/Movies",
+      "path": "/Users/mentuhotep/Movies",
       "files": [],
       "managedFiles": []
     },
     {
       "name": "Pictures",
-      "path": "/Users/zjones/Pictures",
+      "path": "/Users/mentuhotep/Pictures",
       "files": [],
       "managedFiles": []
     }

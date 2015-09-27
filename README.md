@@ -4,12 +4,15 @@
 
 A Node.js script that allows the copying of files in one or more of the host machine's directories to Dropbox. With remote access to Dropbox, users and external applications can manage a JSON configuration file, specifying the files and directories to copy to Dropbox from the host machine.
 
+This script would potentially also work with other cloud storage and file synchronization synchronization services such as Box and Google Drive.
+
 ## Installation
 
 ```bash
 git clone git@github.com:zdj/poormans_server.git
 cd poormans_server
 npm install
+cp config.default.json config.json
 ```
 
 ## Configuration
@@ -18,23 +21,23 @@ npm install
 
 ```json
 {
-  "userDropboxDirectory": "/Users/zjones/Dropbox",
+  "userDropboxDirectory": "/Users/mentuhotep/Dropbox",
   "managedDirectories": [
     {
       "name": "Music",
-      "path": "/Users/zjones/Music",
+      "path": "/Users/mentuhotep/Music",
       "files": [],
       "managedFiles": []
     },
     {
       "name": "Movies",
-      "path": "/Users/zjones/Movies",
+      "path": "/Users/mentuhotep/Movies",
       "files": [],
       "managedFiles": []
     },
     {
       "name": "Pictures",
-      "path": "/Users/zjones/Pictures",
+      "path": "/Users/mentuhotep/Pictures",
       "files": [],
       "managedFiles": []
     }
