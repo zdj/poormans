@@ -65,17 +65,17 @@ After updating *config.json* for the host machine, run the script:
 The first time the script is run, it will attempt to create the required folders specified by *config.json*. For example, the default configuration file shown above would create the following directories and files:
 
 ```
-/Users/zjones/Dropbox/Apps/Poormans/Music
-/Users/zjones/Dropbox/Apps/Poormans/Movies
-/Users/zjones/Dropbox/Apps/Poormans/Pictures
-/Users/zjones/Dropbox/Apps/Poormans/config.json
+/Users/mentuhotep/Dropbox/Apps/Poormans/Music
+/Users/mentuhotep/Dropbox/Apps/Poormans/Movies
+/Users/mentuhotep/Dropbox/Apps/Poormans/Pictures
+/Users/mentuhotep/Dropbox/Apps/Poormans/config.json
 ```
 
 ## Managing host machine files with Dropbox
 
 You must have access to Dropbox via a remote machine or mobile application to copy files from the host machine.
 
-Files can be managed by making changes to the config file created in the script's Dropbox folder, */Users/zjones/Dropbox/Apps/Poormans/config.json*.
+Files can be managed by making changes to the config file created in the script's Dropbox folder, */Users/mentuhotep/Dropbox/Apps/Poormans/config.json*.
 
 To add files from the host machine to Dropbox, add entries from *managedDirectories.files* to *managedDirectories.managedFiles*.
 
