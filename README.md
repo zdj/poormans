@@ -2,9 +2,9 @@
 
 ## About
 
-A Node.js script that allows the copying of files in one or more of the host machine's directories to Dropbox. With remote access to Dropbox, users and external applications can manage a JSON configuration file, specifying the files and directories to copy to Dropbox from the host machine.
+A Node.js script that lets you copy files from a host machine to Dropbox. With remote access to Dropbox, users and external applications manage a JSON configuration file that specifies the files and directories you want to copy to Dropbox from the host machine.
 
-This script would potentially also work with other cloud storage and file synchronization synchronization services such as Box and Google Drive.
+This script would potentially also work with other cloud storage and file synchronization services such as Box and Google Drive.
 
 ## Installation
 
